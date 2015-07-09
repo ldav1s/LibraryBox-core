@@ -36,11 +36,11 @@ SCHEMA_ANON_CONF=$FTP_CONF_FOLDER/anon_access.conf.schema
 . $PIRATEBOX_CONF  #This includes the hook-file too
 # Used Vars
 #   FTP_ENABLED
-#   PROFTPD_PID  
-#   PROFTPD_CONFIG_FILE   < - OUPUT_PROFTPD_CONFIG for 
+#   PROFTPD_PID
+#   PROFTPD_CONFIG_FILE   < - OUPUT_PROFTPD_CONFIG for
 #   FTP_SYNC_ENABLED
-#   PROFTPD_SYNC_PID  
-#   PROFTPD_SYNC_CONFIG_FILE   
+#   PROFTPD_SYNC_PID
+#   PROFTPD_SYNC_CONFIG_FILE
 #   SHARE_FOLDER          < - ??
 #   LIGHTTPD_USER
 #   LIGHTTPD_GROUP
@@ -124,24 +124,24 @@ print_help_admin(){
 
 # Generates all config files based upon the configuration
 generate() {
-	echo -n "Generating FTP Configuration"
+	echo "Generating FTP Configuration\c"
 
 	local l_scoreboard=""
 
 	#Save the scoreboard in memory on OpenWRT
 
-	if [ $IS_OPENWRT ] ; then
+	if [ "$IS_OPENWRT" ] ; then
 		l_scoreboard="/tmp/log/proftpd.scoreboard"
 	else
 		l_scoreboard=$PIRATEBOX_FOLDER"/tmp/proftpd.scoreboard"
 	fi
-	
+
 	#normal server for admin and anon
 	_generate_proftpd_config_ "$SCHEMA_DEAMON_CONF" "$OUTPUT_DAEMON_CONF" "$PROFTPD_PID" "$l_scoreboard"
 
 	#Sync Server with one slot only
 	l_scoreboard=$l_scoreboard".sync"
-	_generate_proftpd_config_ "$SCHEMA_SYNC_CONF" "$OUTPUT_SYNC_CONF" "$PROFTPD_SYNC_PID" "$l_scoreboard"	
+	_generate_proftpd_config_ "$SCHEMA_SYNC_CONF" "$OUTPUT_SYNC_CONF" "$PROFTPD_SYNC_PID" "$l_scoreboard"
 
 	#ANON Stuff
 	sed "s|#####ANON-FOLDER#####|$ANON_FOLDER|"  $SCHEMA_ANON_CONF > $OUTPUT_ANON_CONF
@@ -153,9 +153,9 @@ generate() {
 # Because we have to run two daemons, because one gets confused about
 #  configuration, we have to generate 2 config files , which looks nearly the same
 _generate_proftpd_config_(){
-	local schema_file=$1 ; shift 
+	local schema_file=$1 ; shift
 	local config_file=$1 ; shift
-	local l_pid=$1 ; shift 
+	local l_pid=$1 ; shift
 	local l_scoreboard=$1 ; shift
 
 
@@ -169,22 +169,22 @@ _generate_proftpd_config_(){
 	[ "$IPV6_ENABLE" = "yes" ] &&  l_ipv6="on"
 	l_perf="Include $PERFORMANCE_CONFIG \n"
 
-	sed  "s|#####HOSTNAME#####|$HOST|"  $schema_file > $config_file
+	sed  "s|#####HOSTNAME#####|$HOST|"  "$schema_file" > "$config_file"
 
-	sed  "s|#####IPV6#####|$l_ipv6|" 	-i  $config_file
-	sed  "s|#####BOX_USER#####|$BOX_USER|" 	-i $config_file
-	sed  "s|#####ADMIN_ACCESS#####|$l_allow_admin|" -i $config_file
-	sed  "s|#####SCOREBOARD_PATH#####|$l_scoreboard|" -i $config_file
-	sed  "s|#####INCLUDE_PERFORMANCE#####|$l_perf|" -i $config_file
-	sed  "s|#####INCLUDE_ANON_ACCESS#####|$l_allow_anon|" -i $config_file
-	sed  "s|#####PID#####|$l_pid|" -i $config_file
-	sed  "s|#####ADMIN_FOLDER#####|$ADMIN_FOLDER|" -i  $config_file
-	sed  "s|#####BOX_SYSTEM_USER#####|$BOX_SYSTEM_USER|" -i $config_file
-	sed  "s|#####BOX_SYSTEM_GROUP#####|$BOX_SYSTEM_GROUP|" -i $config_file
+	sed  "s|#####IPV6#####|$l_ipv6|" 	-i  "$config_file"
+	sed  "s|#####BOX_USER#####|$BOX_USER|" 	-i "$config_file"
+	sed  "s|#####ADMIN_ACCESS#####|$l_allow_admin|" -i "$config_file"
+	sed  "s|#####SCOREBOARD_PATH#####|$l_scoreboard|" -i "$config_file"
+	sed  "s|#####INCLUDE_PERFORMANCE#####|$l_perf|" -i "$config_file"
+	sed  "s|#####INCLUDE_ANON_ACCESS#####|$l_allow_anon|" -i "$config_file"
+	sed  "s|#####PID#####|$l_pid|" -i "$config_file"
+	sed  "s|#####ADMIN_FOLDER#####|$ADMIN_FOLDER|" -i  "$config_file"
+	sed  "s|#####BOX_SYSTEM_USER#####|$BOX_SYSTEM_USER|" -i "$config_file"
+	sed  "s|#####BOX_SYSTEM_GROUP#####|$BOX_SYSTEM_GROUP|" -i "$config_file"
 
-	sed  "s|#####SYNC-PORT#####|$SYNC_PORT|" -i $config_file
-	sed  "s|#####SYNC-FOLDER#####|$SYNC_FOLDER|" -i $config_file
-	sed  "s|#####SYNC_SYSTEM_USER#####|$SYNC_SYSTEM_USER|" -i $config_file
+	sed  "s|#####SYNC-PORT#####|$SYNC_PORT|" -i "$config_file"
+	sed  "s|#####SYNC-FOLDER#####|$SYNC_FOLDER|" -i "$config_file"
+	sed  "s|#####SYNC_SYSTEM_USER#####|$SYNC_SYSTEM_USER|" -i "$config_file"
 
 }
 
@@ -199,7 +199,8 @@ _toggle_() {
 
 	#on default always no
 	local new="no"
-	local func_content=$(eval "echo \$${func}")
+	local func_content;
+	func_content=$(eval "echo \$${func}")
 
 	if [ "$func_content" = "no" ] ; then
 		new="yes"
@@ -214,8 +215,8 @@ _toggle_() {
 		(*)			config_file=$BASIC_FTP_CONFIG ;;
 	esac
 
-	sed "s|$func=\"$func_content\"|$func=\"$new\"|" -i $config_file  
-	
+	sed "s|$func=\"$func_content\"|$func=\"$new\"|" -i $config_file
+
 	. $config_file
 
 }
@@ -224,10 +225,12 @@ _toggle_() {
 _change_value_(){
 	local varname=$1
 
-	local new=$(eval "echo \$${varname}")
+	local new;
+	new=$(eval "echo \$${varname}")
 	local old=$new
 
-        read -p " New value for $varname : " new
+	echo " New value for $varname : \c"
+        read new
 
         case $varname in
 		("SYNC_CLIENT_HOST")	        config_file=$FTP_SYNC_CLIENT_CONFIG ;;
@@ -261,15 +264,16 @@ mainmenu() {
 		echo " Enter h and a number for help about the topic. For example, h8 for Client host help"
 		echo " Every other button is a clean exit. "
 		echo " "
-		read -p " Choose an option: " option
+		echo " Choose an option: \c"
+		read option
 
-		case $option in 
+		case $option in
 			("1")	_toggle_ "FTP_ENABLED"   ;;
 			("2")   _toggle_ "ADMIN_ACCESS" ;;
 			("3")   _toggle_ "FTP_SYNC_ENABLED"  ;;
 			("4")   _toggle_ "ENABLE_ANON"  ;;
-			("5")	echo "System-User for Sync Access is $SYNC_SYSTEM_USER"  && passwd $SYNC_SYSTEM_USER ;;
-			("6")   echo "System-User for Admin access is $BOX_SYSTEM_USER" &&  passwd $BOX_SYSTEM_USER ;;
+			("5")	echo "System-User for Sync Access is $SYNC_SYSTEM_USER"  && passwd "$SYNC_SYSTEM_USER" ;;
+			("6")   echo "System-User for Admin access is $BOX_SYSTEM_USER" &&  passwd "$BOX_SYSTEM_USER" ;;
 			("7")   _toggle_ "FTP_SYNC_CLIENT_ENABLED"  ;;
 		   	("8")   _change_value_ "SYNC_CLIENT_HOST"  ;;
 		   	("9")   _change_value_ "SYNC_CLIENT_STATIC_PASSWORD" ;;
