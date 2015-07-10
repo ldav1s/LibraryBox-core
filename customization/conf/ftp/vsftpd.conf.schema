@@ -1,0 +1,21 @@
+ftpd_banner=${VSFTPD_BANNER}
+# standalone mode -- only one of listen and listen_ipv6 must be YES
+listen=${VSFTPD_IPV4}
+listen_ipv6=${VSFTPD_IPV6}
+# listen for both IPv4 and IPv6
+listen_address6=::
+
+# the folder for administration
+local_root=${ADMIN_FOLDER}
+chroot_local_user=YES
+
+# throttle the number of clients
+max_clients=5
+max_per_ip=2
+
+# allow writing
+write_enable=YES
+
+# anonymous users
+anonymous_enable=${ENABLE_ANON}
+anon_root=${ANON_FOLDER}
